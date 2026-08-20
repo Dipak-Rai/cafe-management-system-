@@ -1,0 +1,2 @@
+101, Chicken Burger, Burger, 350, 10
+103, Chicken Pizza, Pizza, 550, 8
