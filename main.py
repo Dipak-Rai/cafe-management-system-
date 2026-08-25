@@ -4,68 +4,175 @@ import os
 
 def create_file():
     try:
-        file_name = input("Enter file name: ")
-        path = Path(file_name)
+        file_name = input("Enter cafe menu file name to create: ")
+        #check file name is empty:
+        if not file_name:
+            print("Error! File name should not empty.")
+            return
         
-        if not os.path.exists(path):
+        path = Path(file_name)
+        # auto extension for file ".txt"
+        if path.suffix=="":
+            path = path.with_suffix(".txt")
+        
+        #check if path exist:  
+        if path.exists():
+            print("Error! This file has already exist.")
+            return
+        
+        if not path.exists():
             with open(path, 'w') as file:
                 pass
-            print("Thank you! File has created successfully.")
-            
-        else:
-            print("Sorry! Such file has already exist.")
+    except PermissionError:
+        print("\nError! You have no permission to create cafe file.")
+    except OSError as err:
+        print(f"\nError! File system error.{err}")
     except Exception as err:
-        print(f"Error! something went wrong. {err}")
-
-def add_menu_item():
-    try:
-        file_name = input("Please enter file name where do yo want to kept menu: ")
-        path = Path(file_name)
+        print(f"\nUnexpected error!.{err}")
         
-        if os.path.exists(path):
-            item_id = input("Enter item id: ").strip()
-            item_name = input("Enter item name: ").strip()
-            category = input("Enter item category: ").strip()
-            price = input("Enter item price: ").strip()
-            available_quantity = input("Enter item quantity: ").strip()
-            
-            menu_item = (
-                f"\n{item_id}, {item_name}, {category}, {price}, {available_quantity}"
-            )
-            with open(path, 'a') as file:
-                file.write(menu_item)     
-            print("\n Menu added successfully.")
-            
+ 
+def add_menu_item():
+    file_name = input("Enter file name to add menu: ").strip()
+    # check file name is empty
+    if not file_name:
+        print("\nError! File name should not be empty.")
+        return
+    
+    path = Path(file_name)
+    
+    #Add .txt extension autometically:
+    if path.suffix=="":
+        path = path.with_suffix(".txt")
+    
+    #check if not file name exsit:
+    if not path.exists():
+        print(f"\nError {path} file is not exist.")
+        return
+    
+    if not path.is_file():
+        print(f"\nError! {path} file is not a file.")
+        return
+    
+    try:
+        path_found = False
+        item_id = input("Enter menu id: ").strip()
+        with open(path, 'r') as file:
+            for line in file:
+                #Check if line is empty
+                if not line.strip():
+                    continue
+                
+                info = line.strip().split(',')
+                if info[0].strip()==item_id.strip():
+                    path_found = True
+                    break
+        if path_found:
+            print("\nSorry! menu id is already exsit.")
+            return
         else:
-            print("Sorry! Such file has not exit")
-    except Exception as err:
-        print(f"Error! Someting went wrong. {err}")
+            pass
+        
+        item_name = input("Enter item name: ").strip()
+        if not item_name:
+            print("\nError! item name should not be empty.")
+            return
+        
+        item_catagory = input("Enter item catagory: ")
+        if not item_catagory:
+            print("\nError! catagory name should not be empty.")
+            return
+        
+        
+        
+        item_price = float(input("Enter item price: ").strip())
+        try:
+            if not item_price:
+                print("\nError! item price should not be empty.")
+                return
+            if item_price<0:
+                print("\Sorry! Price must be in positive number.")
+                return
+        except ValueError as err:
+            print(f"\nSorry! enter valid item price.{err}")
+            return
+        
+        item_quentity = float(input("Enter item quentity: ").strip())
+        try:
+            if not item_quentity:
+                print("\nError! item quentity should not be empty.")
+                return
+            if item_quentity<0:
+                print("\Sorry! quentity must be in positive number.")
+                return
+        except ValueError as err:
+            print(f"\nSorry! enter valid item quentity.{err}")
+            return
+        
+        items_info = (
+            f"{item_id}, {item_name}, {item_catagory}, {item_price}, {item_quentity}\n"
+        )
+        
+        with open (path, 'a') as file:
+            file.write(items_info)
+        print("\n Item added Successfully.")
+        return
+    
+    except PermissionError:
+        print("\nError! you are not allow to add item.")
+    except OSError as err:
+        print(f"Eorror! File system error. {err}")
+        
+          
 
 def view_menu_item():
     try:
-        file_name = input("Enter file name which do you want to view: ")
+        file_name = input("Enter item file name to view: ").strip()
+        if not file_name:
+            print("Error! File name should not be empty.")
+            return
+        
         path = Path(file_name)
         
-        if os.path.exists(path):
-            with open(path, 'r') as file:
-                for line in file:
-                    info = line.strip().split()
-                    print("====================")
-                    print("CAFE MENU")
-                    print("====================")
-                    print(
-                        f"\nItem ID : {info[0]}\n"
-                        f"Item Name : {info[1]}\n"
-                        f"Item Category : {info[2]}\n"
-                        f"Item Price : {info[3]}\n"
-                        f"Item quentity : {info[4]}"
-                    )
-            print("\n View Data Seccessfully")
-            
-        else:
-            print("Sorry! Such file has not exist.")
-    except Exception as err:
-        print(f"Error! Someting went wrong. {err}")
+        if path.suffix=="":
+            path = path.with_suffix(".txt")
+        
+        if not path.exists():
+            print(f"Error! {path} file name has not exist.")
+            return
+        
+        if not path.is_file():
+            print(f"\nError! {path} file is not a file")
+            return
+        
+        with open(path, 'r') as file:
+            for line in file:
+                if not line.strip():
+                    continue
+                
+                info = line.strip().split(',')
+                if len(info)<5:
+                    print("\nSorry! Not foud such information.")
+                    return
+                print("\nItem Information:")
+                print("=======================")
+                print(
+                    f"Item Id           : {info[0]}\n"
+                    f"Item Name         : {info[1]}\n"
+                    f"Item Catagory     : {info[2]}\n"
+                    f"Item Price        :Rs.{info[3]}\n"
+                    f"Item Quantity     : {info[4]}"
+                )
+                
+        print("\nItems show successfully.")
+    except PermissionError:
+        print("\nError! You have no permission to view data.")
+    except OSError:
+        print("\nFile System Error!")
+        
+        
+    
+ 
+ 
 
 def search_menu_item():
     try:

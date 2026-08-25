@@ -1,2 +1,2 @@
-101, Chicken Burger, Burger, 350, 10
-103, Chicken Pizza, Pizza, 550, 8
+101, coffee, Americano, 150.0, 5.0
+102, Mo-Mo, Pork, 250.0, 50.0
