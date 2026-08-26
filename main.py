@@ -159,7 +159,7 @@ def view_menu_item():
                     f"Item Id           : {info[0]}\n"
                     f"Item Name         : {info[1]}\n"
                     f"Item Catagory     : {info[2]}\n"
-                    f"Item Price        :Rs.{info[3]}\n"
+                    f"Item Price        : Rs.{float(info[3]):.2f}\n"
                     f"Item Quantity     : {info[4]}"
                 )
                 
@@ -175,83 +175,148 @@ def view_menu_item():
  
 
 def search_menu_item():
+    file_name = input("Enter file name: ").strip()
+    if not file_name:
+        print("\nError! File name should not be empty.")
+        return
+    
+    path = Path(file_name)
+    
+    if path.suffix == "":
+        path = path.with_suffix(".txt")
+    
+    if not path.exists():
+        print(f"\nError! {path} file does not exist.")
+        return
+    
+    if not path.is_file():
+        print(f"\nError! {path} file is not a file.")
+        return
     try:
-        file_name = input("Enter file name to search item: ")
-        path = Path(file_name)
-        
-        if not os.path.exists(path):
-            print("Sorry such file  does not exist.")
+        path_found = False
+        item_id = input("Enter item id: ").strip()
+        with open(path, 'r') as file:
+            for line in file:
+                if not line.strip():
+                    continue
+                
+                info = line.strip().split(',')
+                if len(info)<5:
+                    print("\nSorry! Invalid information.")
+                    continue
+                
+                if info[0].strip()==item_id.strip():
+                    path_found = True
+                    print("\nItem Information:")
+                    print("=======================")
+                    print(
+                        f"Item Id           : {info[0]}\n"
+                        f"Item Name         : {info[1]}\n"
+                        f"Item Catagory     : {info[2]}\n"
+                        f"Item Price        : Rs.{float(info[3]):.2f}\n"
+                        f"Item Quantity     : {info[4]}"
+                    )
+                    break
+        if path_found:
+            print("\nItem data showed seccessfully.")
+            return
         else:
-            menu_id = input("Enter ID for search menu item: ")
-            found = False
-            with open(path, 'r') as file:
-                for line in file:
-                    info = line.strip().split(',')
-                    
-                    if info[0].strip()==menu_id.strip():
-                        print("====================")
-                        print(f"{info[1]} Item")
-                        print("====================") 
-                        print(             
-                            f"\nItem ID : {info[0]}\n"
-                            f"Item Name : {info[1]}\n"
-                            f"Item Category : {info[2]}\n"
-                            f"Item Price : {info[3]}\n"
-                            f"Item quentity : {info[4]}"
-                        )
-                        print("\n Menu item has been found successfully.")
-                        found = True
-            if not found:
-                print("Sorry! Such item does not found in cafe menu.")
-    except Exception as err:
-        print(f"Sorry! Someting wrong {err}")
+            print("\nSorry! Such item doest not exist.")
+    except PermissionError:
+        print("\nError! You have no permission to search item.")
+    except OSError as err:
+        print(f"\nFile System Error!!. {err}")
+            
 
 def update_menu_item():
+    file_name = input("Enter file name: ").strip()
+    if not file_name:
+        print("\nError! File name should not be empty.")
+        return
+    
+    path = Path(file_name)
+    if path.suffix == "":
+        path = path.with_suffix(".txt")
+    
+    if not path.exists():
+        print(f"\nError! {path} file does not exist.")
+        return
+    
+    if not path.is_file():
+        print(f"\nError! {path} file is not a file.")
+        return
     try:
-        file_name = input("Enter file name: ")
-        item_id = input("Enter item ID to update: ").strip()
-        path = Path(file_name)
-        if os.path.exists(path):
-            with open(path, 'r') as file:
-                items = file.readlines()
-                
-            found = False
+        item_found = False
+        item_id = input("Enter item id for update: ").strip()
+        with open(path, 'r') as file:
+            items = file.readlines()
             for index, line in enumerate(items):
-                item = line.strip().split(',')
+                if not line.strip():
+                    continue
                 
-                if item[0].strip() == item_id.strip():
-                    print("\nCurrent Menu Item")
-                    print("======================")
-                    print(f"Item ID    : {item[0]}")
-                    print(f"Item Name  : {item[1]}")
-                    print(f"Category   : {item[2]}")
-                    print(f"Price      : Rs. {item[3]}")
-                    print(f"Quantity   : {item[4]}")
-
-                    print("\nEnter New Information")
-
-                    item_name = input("Enter Item Name: ").strip()
-                    category = input("Enter Category: ").strip()
-                    price = input("Enter Price: ").strip()
-                    quantity = input("Enter Quantity: ").strip()
-
-                    items[index] = (
-                        f"{item_id},{item_name},{category},"
-                        f"{price},{quantity}\n"
+                item = line.strip().split(",")
+                if len(item)<5:
+                    print("\nError! Invalid Information.")
+                    continue
+                
+                if item[0].strip()==item_id.strip():
+                    item_found = True
+                    print("\nItem Information:")
+                    print("=======================")
+                    print(
+                        f"Item Id           : {item[0]}\n"
+                        f"Item Name         : {item[1]}\n"
+                        f"Item Catagory     : {item[2]}\n"
+                        f"Item Price        : Rs.{float(item[3]):.2f}\n"
+                        f"Item Quantity     : {item[4]}"
                     )
-                    found =True
-                    break
-            if found:
-                with open(path, 'w') as file:
-                    file.writelines(items)
-                print("\n Menu item updated successfully.")
-            else:
-                print("Sorry! Such item ID has not found.")
+                    
+                    print("\n Update item")
+                    update_item_name = input("Update item name: ").strip()
+                    if not update_item_name:
+                        print("\nError! Item name should not be empty.")
+                        return
+                    
+                    update_item_catagory = input("Update item catagory: ").strip()
+                    if not update_item_catagory:
+                        print("\nError! Item catagory should not be empty.")
+                        return
+                    
+                    try:
+                        update_item_price = float(input("Update item price: ").strip())
+                    
+                        if update_item_price<=0:
+                            print("\nError! Item price should not be negative number")
+                            return
+                    except ValueError:
+                        print("\nError! Please enter valid number.")
+                        return
+                        
+                    try:
+                        update_item_quantity = int(input("Update item quantity: ").strip())
+                    
+                        if update_item_quantity<=0:
+                            print("\nError! Quantity should not be in negative number.")
+                            return
+                    except ValueError:
+                        print("\nError! Please enter valid quantity.")
+                        return
+                    
+                    items[index] = (
+                        f"{item[0].strip()}, {update_item_name}, {update_item_catagory}, {update_item_price}, {update_item_quantity}\n"
+                    )
+        if item_found:
+            with open(path, 'w') as file:
+                file.writelines(items)
+            print("\nUpdate item successfully.")
         else:
-            print("Sorry! Such file does not exist.")
-    except Exception as err:
-        print(f"Sorry! Something wrong. {err}")
-
+            print("\nError! Shuch information does not  exist.")
+    except PermissionError:
+        print("\nError! You have not permission to update item.")
+    except OSError as err:
+        print(f"\nFile System Error! {err}")
+        
+                
 def delete_menu_item():
     try:
         file_name = input("Enter file name: ")

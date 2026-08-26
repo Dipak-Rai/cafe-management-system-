@@ -1,2 +1,2 @@
 101, coffee, Americano, 150.0, 5.0
-102, Mo-Mo, Pork, 250.0, 50.0
+102, Choumin, Buff, 90.0, 10
