@@ -318,293 +318,540 @@ def update_menu_item():
         
                 
 def delete_menu_item():
-    try:
-        file_name = input("Enter file name: ")
+    try: 
+        file_name = input("Enter file name for delete: ").strip()
+        if not file_name:
+            print("Error! File name should not be empty.")
+            return
+        
+        path = Path(file_name)
+        
+        if path.suffix == "":
+            path = path.with_suffix(".txt")
+        
+        if not path.exists():
+            print(f"Error! {[path]} file name has not exist.")
+            return
+        
+        if not path.is_file():
+            print(f"Errir! {path} file is not a file.")
+            return
+        
+        item_found = False
         item_id = input("Enter item id for delete: ").strip()
-        path = Path(file_name)
-        
-        if os.path.exists(path):
-            with open(path, 'r') as file:
-                items = file.readlines()
-            
-            found = False
+        with open(path, 'r') as file:
+            items = file.readlines()
             for index, line in enumerate(items):
-                item = line.strip().split(',')
-                
-                if item[0].strip() == item_id.strip():
-                    print("\nMenu Item Found")
-                    print("======================")
-                    print(f"Item ID    : {item[0]}")
-                    print(f"Item Name  : {item[1]}")
-                    print(f"Category   : {item[2]}")
-                    print(f"Price      : Rs. {item[3]}")
-                    print(f"Quantity   : {item[4]}")
-                    
-                    found = True
-                    items.pop(index)
-                    break
-            if found:
-                with open(path, 'w') as file:
-                    file.writelines(items)
-                print("\n Menu item deleted successfully.")
-            else:
-                print("Sorry! Such item ID does not found.")  
-        else:
-            print("Sorry! Such file does not exist.")
-    except Exception as err:
-        print(f"Sorry! Something wrong! {err}")
-
-def create_customer_order():
-    try:
-        file_name = input("Enter file name to create customer order: ")
-        path = Path(file_name)
-        
-        if not os.path.exists(path):
-            with open(path, 'w') as file:
-                pass
-        else:
-            print("Sorry! Such file has already exist")
-    except Exception as err:
-        print(f"Sorry! Something Wrong. {err}")
-
-def add_customer_order():
-    try:
-        menu_file = input("Enter menu file name: ")
-        order_file = input("Enter order file name: ")
-        
-        path_menu_file = Path(menu_file)
-        path_order_file = Path(order_file)
-        
-        if os.path.exists(path_menu_file):
-            order_id = input("Enter order ID: ").strip()
-            customer_name = input("Enter customer name: ").strip()
-            item_id = input("Enter item ID: ").strip()
-            quantity = int(input("Enter quantity: ").strip())
-            
-            found = False
-            with open(path_menu_file, 'r') as file:
-                menu_items = file.readlines()
-                
-            for line in menu_items:
-                item = line.strip().split(',')
-                
-                if item[0]==item_id:
-                    found = True
-                    item_name = item[1].strip()
-                    price = int(item[3].strip())
-                    available_quantity = int(item[4].strip())
-                    
-                    if quantity<=available_quantity:
-                        total = price * quantity
-                        
-                        order = (
-                            f"\n{order_id}, {customer_name}, {item_id}, {quantity}, {price}, {total}"
-                        )
-                        
-                        with open(path_order_file, 'a') as file:
-                            file.write(order)
-                        print("\n Customer Order")
-                        print("===================")
-                        print(f"Order ID: {order_id}\n")
-                        print(f"Customer Name: {customer_name}\n")
-                        print(f"Item: {item_name}\n")
-                        print(f"Quantity : {quantity}\n")
-                        print(f"Price : Rs. {price}\n")
-                        print(f"Total Price: Rs. {total}")
-                        print("\n Order has created successfully.")
-                        
-                    else:
-                        print("Sorry! Not enough quantity")
-                    break
-            if not found:
-                print("Sorry! Item ID does not exist")
-        else:
-            print("Sorry! Such file does not exist.")
-    except Exception as err:
-        print(f"Sorry! Something Wrong. {err}")
-
-def view_order():
-    try:
-        order_file = input("Enter order file name: ").strip()
-        path = Path(order_file)
-
-        if os.path.exists(path):
-
-            with open(path, 'r') as file:
-                items = file.readlines()
-
-            for line in items:
-
                 if not line.strip():
                     continue
-
-                item = line.strip().split(',')
-
-                if len(item) == 6:
-
-                    print("\n** Customer Order **")
-                    print("---------------------------")
-                    print(
-                        f"Order ID      : {item[0]}\n"
-                        f"Customer Name : {item[1]}\n"
-                        f"Item          : {item[2]}\n"
-                        f"Quantity      : {item[3]}\n"
-                        f"Price         : Rs. {item[4]}\n"
-                        f"Total Price   : Rs. {item[5]}"
-                    )
-
-                else:
-                    print("Invalid order information.")
-
+                
+                item = line.strip().split(",")
+                if len(item)<5:
+                    print("Sorry! invalid information.")
+                    continue
+                
+                if item[0].strip() == item_id.strip():
+                    item_found = True
+                    items.pop(index)
+                    break
+        if item_found:
+            with open(path, 'w') as  file:
+                file.writelines(items)
+            print("Item deleted successfully.")
+            return
         else:
-            print("Sorry! Such file does not exist.")
+            print("Sorry! Item does not found.")
+    except PermissionError:
+        print("Error! You have no permission to delete item from menu.")
+    except OSError as err:
+        print(f"File system error! {err}")
     except Exception as err:
-        print(f"Sorry! Something Wrong. {err}")
+        print(f"Unexpected Error! {err}")
+        
+
+def create_customer_order():
+    try: 
+        file_name = input("Enter order file to create file: ").strip()
+        if not file_name:
+            print("Sorry! File name should not be empty.")
+            return
+        
+        path = Path(file_name)
+        
+        if path.suffix == "":
+            path = path.with_suffix(".txt")
+        
+        if path.exists():
+            print(f"Sorry! {path} file name has already exist please change file name.")
+            return
+        
+        
+        with open(path, 'w') as file:
+            pass
+
+        print("Order file created successfully.")
+        return
+    
+    except PermissionError:
+        print("Error! you have no permission to create order file name.")
+    except OSError as err:
+        print(f"File System Error!: {err}")
+        
+    
+
+def add_customer_order():
+    menu_file_name = input("Enter menu item file name: ").strip()
+    
+    if not menu_file_name:
+        print("Error! file name should not be empty.")
+        return
+    
+    order_file_name = input("Enter order file name: ").strip()
+    
+    if not order_file_name:
+        print("Sorry! File name should not be empty.")
+        return
+    
+    
+    path_menu = Path(menu_file_name)
+    path_order = Path(order_file_name)
+    
+    if path_menu.suffix == "":
+        path_menu = path_menu.with_suffix(".txt")
+        
+    
+    if not path_menu.exists():
+        print(f"Soory! {path_menu} file does not exist.")
+        return
+    
+    if not path_menu.is_file():
+        print(f"Sorry! {path_menu} file is not a file.")
+        return
+    
+    if path_order.suffix == "":
+        path_order = path_order.with_suffix(".txt")
+            
+        
+    if not path_order.exists():
+        print(f"Soory! {path_order} file does not exist.")
+        return
+        
+    if not path_order.is_file():
+        print(f"Sorry! {path_order} file is not a file.")
+        return
+    
+    
+    order_id = input("Enter order id: ").strip()
+    if not order_id:
+        print("Sorry! ID should not be empty.")
+        return
+    
+    customer_name = input("Enter customer name: ").strip()
+    if not customer_name:
+        print("Sorry! Customer name should not empty.")
+        return
+    
+    item_id = input("Enter item id: ").strip()
+    if not item_id:
+        print("Sorry! Item name should not be empty.")
+        return
+    
+    try: 
+        quentity = float(input("Enter quantity: ").strip())
+        if quentity<1:
+            print("Sorry! value must be in positive number.")
+    except ValueError:
+        print("Sorry! please enter valid number.")
+        return
+    try: 
+        found = False
+        with open (path_menu, 'r') as file:
+            for line in file:
+                if not line.strip():
+                    continue
+                
+                info = line.strip().split(',')
+                if info[0].strip()==item_id:
+                    found = True
+                    item_name = info[1].strip()
+                    item_price = float(info[3].strip())
+                    available_quantity = float(info[4].strip())
+                    
+                    if available_quantity>=quentity:
+                        total_price = item_price*quentity
+                        
+                        order = (
+                            f"{order_id}, {customer_name}, {item_id}, {item_name}, {quentity}, {item_price}, {total_price}\n"
+                        )
+                        
+                        with open(path_order, 'a') as file:
+                            file.write(order)
+        if found:
+            print("Order added successfully.")
+            return
+        else:
+            print("Sorry! Order item does not exist.")
+    except PermissionError:
+        print("Error! You have no permission to add order.")
+    except OSError as err:
+        print(f"File system error! {err}")
+    
+
+
+def view_order():
+    order_file_name = input("Enter order file name: ").strip()
+    if not order_file_name:
+        print("Sorry! file name should not be empty.")
+        return
+    
+    path = Path(order_file_name)
+    if path.suffix == "":
+        path = path.with_suffix(".txt")
+    
+    if not path.exists():
+        print(f"Error! {path} file name does not exist.")
+        return
+    
+    if not path.is_file():
+        print(f"Error! {path} file is not a file.")
+        return
+    
+    try: 
+        order_found = False
+        order_id = input("Enter order id to view: ")
+        with open(path, 'r') as file:
+            for line in file:
+                if not line.strip():
+                    continue
+                
+                info = line.strip().split(",")
+                
+                if len(info)<7:
+                    print("Sorry! invalid information.")
+                    continue
+                
+                if info[0].strip() == order_id:
+                    order_found = True
+                    print("\nOrder Information")
+                    print("=============================")
+                    print(
+                        f"Order ID: {info[0]}\n"
+                        f"Customer Name: {info[1]}\n"
+                        f"Item ID: {info[2]}\n"
+                        f"Item Name: {info[3]}\n"
+                        f"Order Quantity: {info[4]}\n"
+                        f"Item Price: Rs.{info[5]}\n"   
+                    )
+                    print("==============================")
+                    print(f"Total Price: {info[6]}\n")
+        if order_found:
+            print("Order shown successfully")
+            return
+        else:
+            print("Sorry! Such order does not found.")
+    except PermissionError:
+        print("Error! You have no permission to search order.")
+    except OSError as err:
+        print(f"File System Error! {err}")  
             
 
 def search_order():
+    order_file_name = input("Enter order file name to search: ").strip()
+    if not order_file_name:
+        print("Sorry! File name should not be empty.")
+        return
+    
+    path = Path(order_file_name)
+    if path.suffix=="":
+        path = path.with_suffix(".txt")
+    
+    if not path.exists():
+        print(f"Sorry! {path} file name does not exist.")
+        return
+    
+    if not path.is_file():
+        print(f"Sorry! {path} file name is not a file.")
+        return
+    
+    
     try:
-        order_file = input("Enter file name: ").strip()
-        path = Path(order_file)
-        
-        if os.path.exists(path):
-            order_id = input("Enter order id: ").strip()
-            
-            found = False
-            with open(path, 'r') as file:
-                order_items = file.readlines()
-            for line in order_items:
-                item = line.strip().split(',')
+        order_found = False
+        order_id = input("Enter order id to search: ")
+        with open(path, 'r') as file:
+            for line in file:
+                if not line.strip():
+                    continue
                 
-                if item[0].strip()==order_id:
-                    found = True
-                    print("\n Order Information")
-                    print("=========================")
-                    print(f"Order ID: {item[0]}\n")
-                    print(f"Customer Name: {item[1]}\n")
-                    print(f"Item: {item[2]}\n")
-                    print(f"Quantity : {item[3]}\n")
-                    print(f"Price : Rs. {item[4]}\n")
-                    print(f"Total Price: Rs. {item[5]}")
-            if not found:
-                print("Sorry! order id doest no match.")
+                info = line.strip().split(",")
+                if len(info)<7:
+                    print("Sorry! Invalid information.")
+                    continue
                 
-        else:
-            print("Sorry! This file does not exit.")
-    except Exception as err:
-        print(f"Sorry! Something Wrong. {err}")
-                    
-def update_order():
-    try:
-        order_file = input("Enter order file name for update: ")
-        path = Path(order_file)
-        if os.path.exists(path):
-            order_id = input("Enter order ID for update: ").strip()
-            found = False
-            with open(path, 'r') as file:
-                order_items = file.readlines()
-            for index, line in enumerate(order_items):
-                item = line.strip().split(',')
-                
-                if item[0].strip()==order_id:
-                    found = True
-                    print("\n Current Customer Order")
+                if info[0].strip()==order_id:
+                    order_found = True
+                    print("\nOrder Information")
                     print("=============================")
                     print(
-                        f"Order ID : {item[0]}\n"
-                        f"Customer Name : {item[1]}\n"
-                        f"Item ID : {item[2]}\n"
-                        f"Quantity : {item[3]}\n"
-                        f"Price : {item[4]}\n"
-                        f"Total Price : {item[5]}"              
+                        f"Order ID: {info[0]}\n"
+                        f"Customer Name: {info[1]}\n"
+                        f"Item ID: {info[2]}\n"
+                        f"Item Name: {info[3]}\n"
+                        f"Order Quantity: {info[4]}\n"
+                        f"Item Price: Rs.{info[5]}\n"   
                     )
-                    
-                    print("\n Update Customer Order")
-                    print("============================")
-                    customer_name = input("Update customer name: ")
-                    item_id = input("Update item ID: ")
-                    quantity = int(input("Update quantity: "))
-                    price = int(item[4].strip())
-                    
-                    total = price*quantity
-                    
-                    order_items[index] = (
-                        f"{order_id}, {customer_name}, {item_id}, {quantity}, {price}, {total}\n"
-                    )
-                    break
-            if found:
-                with open(path, 'w') as file: 
-                    file.writelines(order_items)
-                print("\n Order Item Updated Successfully.")
-                    
-            else:
-                print("Sorry! Such id has not exist")
-        
+                    print("==============================")
+                    print(f"Total Price: {info[6]}\n")
+        if order_found:
+            print("Order searched successfully.")
+            return
         else:
-            print("Sorry! This file does not exist.")
-    except Exception as err:
-        print(f'Sorry! Something Worng. {err}')
+            print("Sorry! Such order does not exist.")
+            return
+    except PermissionError:
+        print("Error! You have no permission to search order.")
+    except OSError as err:
+        print(f"File System Error! {err}")
+    
+               
+def update_order():
+    order_file_name = input("Enter order file to update order: ").strip()
+    if not order_file_name:
+        print("Sorry! File name should not be empty.")
+        return
+    
+    path_order = Path(order_file_name)
+    if path_order.suffix=="":
+        path_order = path_order.with_suffix(".txt")
+    
+    if not path_order.exists():
+        print(f"Sorry! {path_order} file name does not exist.")
+        return
+    
+    if not path_order.is_file():
+        print(f"Sorry! {path_order} file name is not a file.")
+        return
+    
+    item_file_name = input("Enter item file to update order: ").strip()
+    if not item_file_name:
+        print("Sorry! File name should not be empty.")
+        return
+    
+    path_item = Path(item_file_name)
+    
+    if path_item.suffix=="":
+        path_item = path_item.with_suffix(".txt")
+    
+    if not path_item.exists():
+        print(f"Sorry! {path_item} file name does not exist.")
+        return
+    
+    if not path_item.is_file():
+        print(f"Sorry! {path_item} file name is not a file.")
+        return
+    
+    try: 
+        order_found = False
+        order_id = input ("Enter order id for update order: ").strip()
+        with open(path_order, 'r') as file:
+            order_items = file.readlines()
+            for index, line in enumerate(order_items):
+                if not line.strip():
+                    continue
+                
+                info = line.strip().split(",")
+                
+                if len(info)<7:
+                    print("Sorry! Invalid informatin.")
+                    continue
+                
+                if info[0].strip()==order_id:
+                    order_found = True
+                    
+                    customer_name = input("Update customer name: ").strip()
+                    if not customer_name:
+                        print("\nSorry! Customer name should not be empty.")
+                        return
+                    
+                    try: 
+                        quantity = float(input("Update quantity: "))
+                        if quantity<1:
+                            print("\nSorry! Quantity should be in positive.")
+                            return
+                    except ValueError:
+                        print("\nError! Please enter a valid quantity.")
+                        return
+                    
+                    
+                    
+                    item_found = False
+                    item_id = input("Enter item id for update: ").strip()
+                    with open(path_item, 'r') as file:
+                        for line in file:
+                            if not line.strip():
+                                continue
+                            
+                            info = line.strip().split(",")
+                            
+                            if len(info)<5:
+                                print("Sorry! Invalid information.")
+                                continue
+                            
+                            if info[0].strip()==item_id:
+                                item_found = True
+                                item_name = info[1].strip()
+                                item_price = float(info[3].strip())
+                                available_quantity = float(info[4].strip())
+                                
+                                
+                                if available_quantity<quantity:
+                                    print(f"\nSorry! only {available_quantity} items are available.")
+                                    return
+                                else:
+                                    total_price = item_price*quantity
+                                    
+                                    
+                                    order_items[index] = (
+                                        f"{order_id}, {customer_name}, {item_id}, {item_name}, {quantity}, {item_price}, {total_price}\n"
+                                    )
+                                    
+                    if item_found:
+                        pass
+                    else:
+                        print("Error! Item id deos not found.")
+                        return
+        if order_found:
+            with open(path_order, 'w') as file:
+                file.writelines(order_items)
+            print("Updated successfully.")
+            return
+        else: 
+            print("Sorry! Such information does not exsit.")
+    except PermissionError:
+        print("Sorry! you do not have permission to update orders.")
+    except OSError as err:
+        print(f"File system error! {err}")
+  
                 
                 
 def delete_order():
-    order_file = input("Enter order file for delete: ").strip()
-    path = Path(order_file)
+    order_file = input("Enter order file to delete: ").strip()
+    if not order_file:
+        print("Sorry! order file should not empty.")
+        return
     
-    if os.path.exists(path):
-        found = False
-        order_id = input("Enter order id for delete order item: ").strip()
+    path = Path(order_file)
+    if path.suffix=="":
+        path = path.with_suffix(".txt")
+    
+    if not path.exists():
+        print(f"Sorry! {path} file does not exsit.")
+        return
+    
+    if not path.is_file():
+        print(f"Sorry! {path} file is not a order file")
+        return
+    
+    try:
+        order_found = False
+        order_id = input("Enter order id for delete: ")
         
-        with open (path, 'r') as file:
+        with open(path, 'r') as file:
             order_items = file.readlines()
-            
             for index, line in enumerate(order_items):
-                info = line.strip().split(',')
+                if not line.strip():
+                    continue
                 
-                if info and info[0].strip()==order_id:
-                    found =True
+                info = line.strip().split(",")
+                
+                if len(info)<7:
+                    print("Sorry! invalid information.")
+                    continue
+                
+                if info[0].strip()==order_id:
+                    order_found = True
                     order_items.pop(index)
                     break
-        if found:
+        if order_found:
             with open(path, 'w') as file:
                 file.writelines(order_items)
-            print("Order item deleted successfully.")
+            print("Delete successfully.")
+            return
         else:
-            print("Sorry! such order ID does not exist")
-    else:
-        print("Sorry! Such file does not exist: ")
+            print("Sorry! Such information has not found.")
+    except PermissionError:
+        print("Sorry! you have no permission to delete order items.")
+    except OSError as err:
+        print(f"File system error! {err}")
+        
+            
 
 
 def cafe_summary():
-    cafe_menu = input("Enter cafe menu file name: ").strip()
-    customer_order = input("Enter customer order file name: ").strip()
+    item_file_name = input("Enter menu file name: ").strip()
+    if not item_file_name:
+        print("Sorry! File name should not be empty.")
+        return
     
-    path_cafe = Path(cafe_menu)
-    path_customer = Path(customer_order)
+    count_item = 0
     
-    menu_count = 0
-    customer_order_coun = 0
+    item_path = Path(item_file_name)
+    if item_path.suffix == "":
+        item_path = item_path.with_suffix(".txt")
     
-    if path_cafe.is_file():
-        with open(path_cafe, 'r') as file:
+    if not item_path.exists():
+        print(f"Sorry! {item_path} file does not exist.")
+        return
+    
+    if not item_path.is_file():
+        print(f"Sorry! {item_path} file is not a file.")
+        return
+    
+    order_file_item = input("Enter order file: ").strip()
+    if not order_file_item:
+        print("Sorry! file name should not be empty.")
+        return
+    
+    count_order = 0
+    order_path = Path(order_file_item)
+    
+    if order_path.suffix=="":
+        order_path = order_path.with_suffix(".txt")
+    
+    if not order_path.exists():
+        print(f"Sorry! {order_path} file does not exist.")
+        return
+    
+    if not order_path.is_file():
+        print(f"Sorry! {order_path} file is not a file.")
+        return
+    
+    try: 
+        with open(item_path, 'r') as file:
             for line in file:
-                if line.strip():
-                    menu_count+=1           
-                
-    else:
-        print("Sorry! Such file does not exist: ")
+                if line:
+                    count_item+=1
+                    continue
     
-    if path_customer.is_file():
-            with open(path_customer, 'r') as file:
-                for line in file:
-                    if line.strip():
-                        customer_order_coun+=1           
-                    
-    else:
-        print("Sorry! Such file does not exist: ")
+        with open(order_path, 'r') as file:
+            for line in file:
+                if line:
+                    count_order+=1
+                    continue
+
     
-    print("\n ============= Hotel Summery ===============")
-    print(f"Total menu items: {menu_count}")
-    print(f"Total customer order items: {customer_order_coun}")
+        print("\nCafe Summery:")
+        print("================================")
+        print(
+            f"Total Items = {count_item}\n"
+            f"Total Orders = {count_order}"
+        )
+    except PermissionError:
+        print("Sorry! you have no permission.")
+    except OSError as err:
+        print(f"File System error! {err}")
+    except Exception as err:
+        print(f"\nUnexpected error! {err}")
+        
     
     
 
